@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Find Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 20px auto;
+    }
+    form {
+      margin-top: 20px;
+    }
+    label, textarea, input {
+      display: block;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #countdown {
+      font-weight: bold;
+      font-size: 18px;
+      color: #d9534f;
+    }
+  </style>
+</head>
+<body>
+  hours from your first visit on this device to complete the puzzle.</p>
+  <p>Time remaining: <span id="countdown">72:00:00</span></p>
+  <img src="word-find.png" alt="Word Find Puzzle Image" />
+
+  <form id="puzzleForm">
+    <label for="name">Your Name (required):</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="answers">Words You Found (required):</label>
+    <textarea id="answers" name="answers" rows="6" required></textarea>
+
+    <label for="timeSpent">Time Taken (response validation):</label>
+    <input type="text" id="timeSpent" name="timeSpent" readonly />
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('puzzleForm');
+    const countdownDisplay = document.getElementById('countdown');
+    const timeSpentInput = document.getElementById('timeSpent');
+    const startKey = 'puzzleStartTime';
+    const maxDuration = 72 * 60 * 60 * 1000;
+
+    let startTime = localStorage.getItem(startKey);
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem(startKey, startTime);
+    } else {
+      startTime = parseInt(startTime);
+    }
+
+    const deadline = startTime + maxDuration;
+    const sessionStart = Date.now();
+
+    const countdownInterval = setInterval(() => {
+      const now = Date.now();
+      const remaining = deadline - now;
+
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        countdownDisplay.textContent = "00:00:00";
+        alert("Your 72-hour submission window has expired.");
+        form.querySelector("button").disabled = true;
+        return;
+      }
+
+      const hours = String(Math.floor(remaining / (1000 * 60 * 60))).padStart(2, '0');
+      const minutes = String(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+      const seconds = String(Math.floor((remaining % (1000 * 60)) / 1000)).padStart(2, '0');
+
+      countdownDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+    }, 1000);
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const now = Date.now();
+      const totalElapsed = now - startTime;
+
+      if (totalElapsed > maxDuration) {
+        alert("Sorry, your 72-hour submission window has expired.");
+        return;
+      }
+
+      const sessionDuration = Math.floor((now - sessionStart) / 1000);
+      timeSpentInput.value = sessionDuration;
+
+      const formData = new FormData(form);
+
+      fetch("https://script.google.com/macros/s/AKfycbw37ATx3WgQxU7obxVBt-dwmttFzXYQwP3Geb7QiC2O5WaNaA3Fvg-IWqnGbuL-j04V/exec", {
+        method: "POST",
+        body: formData
+      }).then(() => {
+        alert("Thanks for submitting your answers!");
+        window.location.href = "thank-you.html";
+      }).catch((error) => {
+        console.error("Submission failed", error);
+        alert("There was an error submitting your form.");
+      });
+    });
+  </script>
+</body>
+</html>
