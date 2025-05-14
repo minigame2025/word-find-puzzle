@@ -68,7 +68,7 @@
     if (localStorage.getItem(submittedKey) === 'true') {
       form.style.display = 'none';
       const message = document.createElement('p');
-      message.textContent = "Nice try, puzzle master! But you've already submitted your answers. One shot is all you get!";
+      message.textContent = "You've already submitted—great job! No second tries, but you're welcome to cheer others on!";
       document.body.appendChild(message);
     } else {
       let startTime = localStorage.getItem(startKey);
@@ -133,10 +133,6 @@
         });
       });
     }
-
-    const explanation = document.createElement('p');
-    explanation.textContent = "Nice try, puzzle master! But you've already submitted your answers. One shot is all you get!";
-    document.body.appendChild(explanation);
   </script>
 </body>
 </html>
