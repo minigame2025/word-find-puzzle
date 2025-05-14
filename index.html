@@ -122,6 +122,11 @@
         alert("There was an error submitting your form.");
       });
     });
+
+    // Explanation about localStorage
+    const explanation = document.createElement('p');
+    explanation.textContent = "Note: The timer is saved using localStorage, which stores data only in the specific browser/device. If you open in incognito mode, clear your browser data, or use a different browser/device, the timer will reset because localStorage will be empty.";
+    document.body.appendChild(explanation);
   </script>
 </body>
 </html>
