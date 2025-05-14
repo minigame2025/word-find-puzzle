@@ -30,9 +30,7 @@
       color: white;
       border: none;
       cursor: pointer;
-    }
-    #countdown {
-      font-weight: bold;
+    font-weight: bold;
       font-size: 18px;
       color: #d9534f;
     }
@@ -57,24 +55,16 @@
     <button type="submit">Submit</button>
   </form>
 
-  <div id="githubLink" style="display: none; margin-top: 20px;">
-    <p>Great job! You can now access the GitHub repository:</p>
-    <a href="https://github.com/your-repo-link" target="_blank">Visit GitHub Repository</a>
-  </div>
-
   <script>
     const form = document.getElementById('puzzleForm');
     const countdownDisplay = document.getElementById('countdown');
     const timeSpentInput = document.getElementById('timeSpent');
-    const githubLink = document.getElementById('githubLink');
     const startKey = 'puzzleStartTime';
     const submittedKey = 'hasSubmitted';
     const maxDuration = 72 * 60 * 60 * 1000;
 
-    // Check if already submitted
     if (localStorage.getItem(submittedKey) === 'true') {
       form.style.display = 'none';
-      githubLink.style.display = 'none';
       const message = document.createElement('p');
       message.textContent = "You have already submitted the puzzle. Access to the GitHub link is no longer available.";
       document.body.appendChild(message);
@@ -132,10 +122,9 @@
           method: "POST",
           body: formData
         }).then(() => {
-          alert("Thanks for submitting your answers!");
-          githubLink.style.display = "block";
           localStorage.setItem(submittedKey, "true");
-          form.style.display = "none";
+          localStorage.setItem("justSubmitted", "true");
+          window.location.href = "thank-you.html";
         }).catch((error) => {
           console.error("Submission failed", error);
           alert("There was an error submitting your form.");
@@ -143,7 +132,6 @@
       });
     }
 
-    // Explanation about localStorage
     const explanation = document.createElement('p');
     explanation.textContent = "Note: The timer and submission status are saved using localStorage, which stores data only in the specific browser/device. If you open in incognito mode, clear your browser data, or use a different browser/device, the timer and submission status will reset.";
     document.body.appendChild(explanation);
