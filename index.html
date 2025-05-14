@@ -59,74 +59,77 @@
   </form>
 
   <script>
-    const form = document.getElementById('puzzleForm');
-    const countdownDisplay = document.getElementById('countdown');
-    const timeSpentInput = document.getElementById('timeSpent');
-    const startKey = 'puzzleStartTime';
-    const maxDuration = 72 * 60 * 60 * 1000;
+  const form = document.getElementById('puzzleForm');
+  const countdownDisplay = document.getElementById('countdown');
+  const timeSpentInput = document.getElementById('timeSpent');
+  const startKey = 'puzzleStartTime';
+  const maxDuration = 72 * 60 * 60 * 1000;
 
-    let startTime = localStorage.getItem(startKey);
-    if (!startTime) {
-      startTime = Date.now();
-      localStorage.setItem(startKey, startTime);
-    } else {
-      startTime = parseInt(startTime);
+  let startTime = localStorage.getItem(startKey);
+  if (!startTime) {
+    startTime = Date.now();
+    localStorage.setItem(startKey, startTime);
+  } else {
+    startTime = parseInt(startTime);
+  }
+
+  const deadline = startTime + maxDuration;
+  const sessionStart = Date.now();
+
+  const countdownInterval = setInterval(() => {
+    const now = Date.now();
+    const remaining = deadline - now;
+
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      countdownDisplay.textContent = "00:00:00";
+      alert("Your 72-hour submission window has expired.");
+      form.querySelector("button").disabled = true;
+      return;
     }
 
-    const deadline = startTime + maxDuration;
-    const sessionStart = Date.now();
+    const hours = String(Math.floor(remaining / (1000 * 60 * 60))).padStart(2, '0');
+    const minutes = String(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    const seconds = String(Math.floor((remaining % (1000 * 60)) / 1000)).padStart(2, '0');
 
-    const countdownInterval = setInterval(() => {
-      const now = Date.now();
-      const remaining = deadline - now;
+    countdownDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+  }, 1000);
 
-      if (remaining <= 0) {
-        clearInterval(countdownInterval);
-        countdownDisplay.textContent = "00:00:00";
-        alert("Your 72-hour submission window has expired.");
-        form.querySelector("button").disabled = true;
-        return;
-      }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-      const hours = String(Math.floor(remaining / (1000 * 60 * 60))).padStart(2, '0');
-      const minutes = String(Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-      const seconds = String(Math.floor((remaining % (1000 * 60)) / 1000)).padStart(2, '0');
+    const now = Date.now();
+    const totalElapsed = now - startTime;
 
-      countdownDisplay.textContent = `${hours}:${minutes}:${seconds}`;
-    }, 1000);
+    if (totalElapsed > maxDuration) {
+      alert("Sorry, your 72-hour submission window has expired.");
+      return;
+    }
 
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+    const sessionDuration = Math.floor((now - sessionStart) / 1000);
+    const hoursSpent = String(Math.floor(sessionDuration / 3600)).padStart(2, '0');
+    const minutesSpent = String(Math.floor((sessionDuration % 3600) / 60)).padStart(2, '0');
+    const secondsSpent = String(sessionDuration % 60).padStart(2, '0');
+    timeSpentInput.value = `${hoursSpent}:${minutesSpent}:${secondsSpent}`;
 
-      const now = Date.now();
-      const totalElapsed = now - startTime;
+    const formData = new FormData(form);
 
-      if (totalElapsed > maxDuration) {
-        alert("Sorry, your 72-hour submission window has expired.");
-        return;
-      }
-
-      const sessionDuration = Math.floor((now - sessionStart) / 1000);
-      timeSpentInput.value = sessionDuration;
-
-      const formData = new FormData(form);
-
-      fetch("https://script.google.com/macros/s/AKfycbw37ATx3WgQxU7obxVBt-dwmttFzXYQwP3Geb7QiC2O5WaNaA3Fvg-IWqnGbuL-j04V/exec", {
-        method: "POST",
-        body: formData
-      }).then(() => {
-        alert("Thanks for submitting your answers!");
-        window.location.href = "thank-you.html";
-      }).catch((error) => {
-        console.error("Submission failed", error);
-        alert("There was an error submitting your form.");
-      });
+    fetch("https://script.google.com/macros/s/AKfycbw37ATx3WgQxU7obxVBt-dwmttFzXYQwP3Geb7QiC2O5WaNaA3Fvg-IWqnGbuL-j04V/exec", {
+      method: "POST",
+      body: formData
+    }).then(() => {
+      alert("Thanks for submitting your answers!");
+      window.location.href = "thank-you.html";
+    }).catch((error) => {
+      console.error("Submission failed", error);
+      alert("There was an error submitting your form.");
     });
+  });
 
-    // Explanation about localStorage
-    const explanation = document.createElement('p');
-    explanation.textContent = "Note: The timer is saved using localStorage, which stores data only in the specific browser/device. If you open in incognito mode, clear your browser data, or use a different browser/device, the timer will reset because localStorage will be empty.";
-    document.body.appendChild(explanation);
-  </script>
+  // Explanation about localStorage
+  const explanation = document.createElement('p');
+  explanation.textContent = "Note: The timer is saved using localStorage, which stores data only in the specific browser/device. If you open in incognito mode, clear your browser data, or use a different browser/device, the timer will reset because localStorage will be empty.";
+  document.body.appendChild(explanation);
+</script>
 </body>
 </html>
